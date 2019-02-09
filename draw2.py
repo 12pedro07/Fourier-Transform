@@ -5,6 +5,37 @@ import random
 from math import *
 import json
 
+class mousecoord:
+    def __init__(self,img):
+        self.coordinatesX = []
+        self.coordinatesY = []
+        self.px = 0
+        self.py = 0
+        self.drawing = False
+        self.img = img
+
+    def mouse_callback(self,event,x,y,flags,param):
+
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self.coordinatesX = []
+            self.coordinatesY = []
+            self.drawing = True
+
+        elif event == cv2.EVENT_MOUSEMOVE:
+            if self.drawing == True:
+                cv2.line(self.img,(self.px,self.py),(x,y),(0,0,255),2)
+                #cv2.circle(self.img,(x,y),5,(255,0,0),-1)
+                auxx,auxy = recenter(x,y,self.img,"-b")
+                self.coordinatesX.append(int(auxx))
+                self.coordinatesY.append(int(auxy))
+
+        elif event == cv2.EVENT_LBUTTONUP:
+            print("x: ",self.coordinatesX)
+            print("y: ",self.coordinatesY)
+            self.drawing = False
+
+        self.px = x
+        self.py = y
 
 def map(value, start1, stop1, start2, stop2):
     # adapted from:
@@ -74,8 +105,31 @@ def recenter(x,y,img,flag=""):
     return int(x),int(y)
 
 def draw():
+    # img parameters
+    w = 1400
+    h = 800
+    t = 0
+    path = []
+    # setup the black background
+    img = np.zeros((h, w, 3),np.uint8)
+    cv2.namedWindow('image')
+
     signalX = []
     signalY = []
+
+    # uncomment for manual draw ###########################################################
+    mouse = mousecoord(img)
+    cv2.setMouseCallback('image',mouse.mouse_callback)
+    while(1):
+        cv2.imshow('image',mouse.img)
+        if cv2.waitKey(1) & 0xFF == 27:
+            signalX = mouse.coordinatesX
+            signalX += signalX[::-1]
+            signalY = mouse.coordinatesY
+            signalY += signalY[::-1]
+            break
+    cv2.destroyAllWindows()
+    #######################################################################################
 
     # uncoment for circle #################################################################
     # for i in range(100):
@@ -84,21 +138,22 @@ def draw():
     #     signalY.append(125*sin(angle))
     #######################################################################################
 
-    # uncoment for code_train logo ########################################################
+    # uncomment for code_train logo ########################################################
+    # print("Loading json file ...")
     # with open('codingtrain.json') as data_file:
     #     data = json.load(data_file)
     # signalX = [data["drawing"][i*3]['x'] for i in range(int(len(data["drawing"])/3))]
     # signalY = [data["drawing"][i*3]['y'] for i in range(int(len(data["drawing"])/3))]
     #######################################################################################
 
-    # uncoment for hearth draw ############################################################
-    t = 2
-    while t <= 40:
-        x = 4*(16*(sin(t))**3)
-        y = -4*(13*cos(t)-5*cos(2*t)-2*cos(3*t)-cos(4*t))
-        signalX.append(x)
-        signalY.append(y)
-        t = t+0.05
+    # uncomment for hearth draw ############################################################
+    # t = 2
+    # while t <= 40:
+    #     x = 4*(16*(sin(t))**3)
+    #     y = -4*(13*cos(t)-5*cos(2*t)-2*cos(3*t)-cos(4*t))
+    #     signalX.append(x)
+    #     signalY.append(y)
+    #     t = t+0.05
     #######################################################################################
 
     # Calculating dft
@@ -109,13 +164,6 @@ def draw():
     fourierX = sorted(fourierX, key=lambda k: k["amp"], reverse = True)
     fourierY = sorted(fourierY, key=lambda k: k["amp"], reverse = True)
 
-    # img parameters
-    w = 1400
-    h = 800
-    t = 0
-    path = []
-    # setup the black background
-    img = np.zeros((h, w, 3),np.uint8)
 
     while(1):
         # display the img
@@ -141,9 +189,9 @@ def draw():
         path.insert(0,(x1,y2)) # shift to the right and append value on index 0
         prvx = path[0][0]
         prvy = path[0][1]
-        cv2.line(img,(x1,y1),(path[0][0],path[0][1]),(0,255,0),1)
-        cv2.line(img,(x2,y2),(path[0][0],path[0][1]),(0,255,0),1)
-        cv2.circle(img,(path[0][0],path[0][1]),5,(0,0,255),-1)
+        cv2.line(img,(x1,y1),(prvx,prvy),(0,255,0),1)
+        cv2.line(img,(x2,y2),(prvx,prvy),(0,255,0),1)
+        cv2.circle(img,(prvx,prvy),5,(0,0,255),-1)
         for i in range(len(path)):
             cv2.line(img,(prvx,prvy),(path[i][0],path[i][1]),(255,255,255),2)
             prvx = path[i][0]
@@ -154,6 +202,6 @@ def draw():
         # function time count
         dt = 2*pi / len(fourierY)
         t -= dt
-        #time.sleep(0.01)
+        time.sleep(0.08)
 
 draw()

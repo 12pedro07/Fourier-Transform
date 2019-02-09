@@ -26,7 +26,7 @@ def draw():
     img = np.zeros((h, w, 3),np.uint8)
     # cria as barras de opcao
     cv2.namedWindow('image')
-    cv2.createTrackbar('N','image',1,8,nothing)
+    cv2.createTrackbar('N','image',1,20,nothing)
 
     while(1):
         N = cv2.getTrackbarPos('N','image')
