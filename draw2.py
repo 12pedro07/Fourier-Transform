@@ -30,8 +30,8 @@ class mousecoord:
                 self.coordinatesY.append(int(auxy))
 
         elif event == cv2.EVENT_LBUTTONUP:
-            print("x: ",self.coordinatesX)
-            print("y: ",self.coordinatesY)
+            #print("x: ",self.coordinatesX)
+            #print("y: ",self.coordinatesY)
             self.drawing = False
 
         self.px = x
@@ -118,6 +118,7 @@ def draw():
     signalY = []
 
     # uncomment for manual draw ###########################################################
+    print("\n-------------------------------------------------------------------------\n----- Hold left mouse button to draw\n----- In case of multiple drawings, only the last one is considered\n----- After you have finished press esc and have fun!\n-------------------------------------------------------------------------")
     mouse = mousecoord(img)
     cv2.setMouseCallback('image',mouse.mouse_callback)
     while(1):
@@ -200,8 +201,12 @@ def draw():
 ##############################################################
 
         # function time count
-        dt = 2*pi / len(fourierY)
-        t -= dt
-        time.sleep(0.08)
+        if len(fourierY) != 0:
+            dt = 2*pi / len(fourierY)
+            t -= dt
+            time.sleep(0.01)
+        else:
+            print("ERROR: No drawing found, restart the program")
+            break
 
 draw()
