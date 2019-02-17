@@ -117,45 +117,62 @@ def draw():
     signalX = []
     signalY = []
 
-    # uncomment for manual draw ###########################################################
-    print("\n-------------------------------------------------------------------------\n----- Hold left mouse button to draw\n----- In case of multiple drawings, only the last one is considered\n----- After you have finished press esc and have fun!\n-------------------------------------------------------------------------")
-    mouse = mousecoord(img)
-    cv2.setMouseCallback('image',mouse.mouse_callback)
-    while(1):
-        cv2.imshow('image',mouse.img)
-        if cv2.waitKey(1) & 0xFF == 27:
-            signalX = mouse.coordinatesX
-            signalX += signalX[::-1]
-            signalY = mouse.coordinatesY
-            signalY += signalY[::-1]
-            break
-    cv2.destroyAllWindows()
-    #######################################################################################
+    # Menu
+    menuAux = True
+    while menuAux == True:
+        print("\n-------------------------------------------------------------------------\n1 - Manual draw mode;\n2 - Circle test auto draw\n3 - Coding Train logo auto draw\n4 - Hearth auto draw\n-------------------------------------------------------------------------\n")
+        menu = int(input('---> '))
+        
+        # Manual mode #########################################################################
+        if menu == 1:
+            print("\n-------------------------------------------------------------------------\n----- Hold left mouse button to draw\n----- In case of multiple drawings, only the last one is considered\n----- After you have finished press esc and have fun!\n-------------------------------------------------------------------------")
+            mouse = mousecoord(img)
+            cv2.setMouseCallback('image',mouse.mouse_callback)
+            while(1):
+                cv2.imshow('image',mouse.img)
+                if cv2.waitKey(1) & 0xFF == 27:
+                    signalX = mouse.coordinatesX
+                    signalX += signalX[::-1]
+                    signalY = mouse.coordinatesY
+                    signalY += signalY[::-1]
+                    break
+            cv2.destroyAllWindows()
+            menuAux = False
+        #######################################################################################
 
-    # uncoment for circle #################################################################
-    # for i in range(100):
-    #     angle = map(i,0,100,0,pi*2)
-    #     signalX.append(125*cos(angle))
-    #     signalY.append(125*sin(angle))
-    #######################################################################################
+        # Circle ##############################################################################
+        elif menu == 2:
+            for i in range(100):
+                angle = map(i,0,100,0,pi*2)
+                signalX.append(125*cos(angle))
+                signalY.append(125*sin(angle))
+            menuAux = False
+        #######################################################################################
 
-    # uncomment for code_train logo ########################################################
-    # print("Loading json file ...")
-    # with open('codingtrain.json') as data_file:
-    #     data = json.load(data_file)
-    # signalX = [data["drawing"][i*3]['x'] for i in range(int(len(data["drawing"])/3))]
-    # signalY = [data["drawing"][i*3]['y'] for i in range(int(len(data["drawing"])/3))]
-    #######################################################################################
+        # Coding train logo ###################################################################
+        elif menu == 3:
+            print("Loading json file ...")
+            with open('codingtrain.json') as data_file:
+                data = json.load(data_file)
+            signalX = [data["drawing"][i*3]['x'] for i in range(int(len(data["drawing"])/3))]
+            signalY = [data["drawing"][i*3]['y'] for i in range(int(len(data["drawing"])/3))]
+            menuAux = False
+        #######################################################################################
 
-    # uncomment for hearth draw ############################################################
-    # t = 2
-    # while t <= 40:
-    #     x = 4*(16*(sin(t))**3)
-    #     y = -4*(13*cos(t)-5*cos(2*t)-2*cos(3*t)-cos(4*t))
-    #     signalX.append(x)
-    #     signalY.append(y)
-    #     t = t+0.05
-    #######################################################################################
+        # Hearth draw #########################################################################
+        elif menu == 4:
+            t = 2
+            while t <= 40:
+                x = 4*(16*(sin(t))**3)
+                y = -4*(13*cos(t)-5*cos(2*t)-2*cos(3*t)-cos(4*t))
+                signalX.append(x)
+                signalY.append(y)
+                t = t+0.05
+            menuAux = False
+        #######################################################################################
+
+        else:
+            print("\n#################################\nERROR: Invalid Option, try again...\n#################################\n")
 
     # Calculating dft
     fourierX = dft(signalX)
@@ -184,7 +201,7 @@ def draw():
 
         x1, y1 = epiCycles(400,-300,0,fourierX,t,img)
         x2, y2 = epiCycles(0,0,pi/2,fourierY,t,img)
-        #cleaning wave list
+        # cleaning wave list
         if (len(path)>10000):
             del path[len(path)-1]
         path.insert(0,(x1,y2)) # shift to the right and append value on index 0
